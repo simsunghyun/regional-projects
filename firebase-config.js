@@ -1,9 +1,9 @@
 export const firebaseConfig = {
-  "apiKey": "AIzaSyBvQUky6Sx5axuD-jt5ahboL0F0SQU1ZmQ",
-  "authDomain": "regional-projects.firebaseapp.com",
-  "projectId": "regional-projects",
-  "storageBucket": "regional-projects.firebasestorage.app",
-  "messagingSenderId": "168885625280",
-  "appId": "1:168885625280:web:1a362266942791ca952825"
+  apiKey: "AIzaSyBsHvIGAYkiluourNwwB_R_vPRUNL4wKBQ",
+  authDomain: "regional-committee-insights.firebaseapp.com",
+  projectId: "regional-committee-insights",
+  storageBucket: "regional-committee-insights.firebasestorage.app",
+  messagingSenderId: "373051677665",
+  appId: "1:373051677665:web:870208f50fa92ae5fa50a0"
 };
-export const OWNER_EMAIL = "ssh3608@gmail.com";
+export const OWNER_EMAIL = 'ssh3608@gmail.com';

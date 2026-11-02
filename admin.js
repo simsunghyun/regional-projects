@@ -1,4 +1,4 @@
-import {auth, db, OWNER_EMAIL, doc, collection, getDocFromServer, getDocsFromServer, setDoc, deleteDoc, writeBatch, serverTimestamp, onAuthStateChanged, login, signOut, isAllowed, isOwner, errorText} from './firebase-client.js';
+import {auth, db, OWNER_EMAIL, doc, collection, getDocFromServer, getDocsFromServer, setDoc, deleteDoc, writeBatch, serverTimestamp, onAuthStateChanged, login, signOut, isAllowed, isOwner, errorText} from './firebase-client.js?v=committee1';
 import {CHUNK_SIZE,fileId,toBase64,digest} from './private-format.js';
 const $=id=>document.getElementById(id);
 const status=message=>{$('status').textContent=message;};
@@ -34,15 +34,15 @@ $('upload').onclick=async()=>{
   try{
     if(!isOwner(auth.currentUser)||!await isAllowed(auth.currentUser))throw Error('관리자 로그인이 필요합니다.');
     const files=new Map(selected.map(file=>[file.webkitRelativePath.split('/').slice(1).join('/'),file]));
-    const manifestFile=files.get('manifest.json');if(!manifestFile)throw Error('manifest.json이 들어 있는 Firebase자료 폴더를 선택해 주세요.');
+    const manifestFile=files.get('manifest.json');if(!manifestFile)throw Error('manifest.json이 들어 있는 위원대시보드자료 폴더를 선택해 주세요.');
     const manifest=JSON.parse(await manifestFile.text());
-    if(manifest.format!==1||!Array.isArray(manifest.files)||!manifest.files.length)throw Error('자료 목록 형식이 올바르지 않습니다.');
-    for(const item of manifest.files){if(!/^(data\/.*\.js|downloads\/[^/]+)$/.test(item.path)||!files.has(item.path)||files.get(item.path).size!==item.size)throw Error('자료 누락 또는 크기 불일치: '+item.path);}
+    if(manifest.format!==1||!Array.isArray(manifest.files)||manifest.files.length!==1)throw Error('자료 목록 형식이 올바르지 않습니다.');
+    for(const item of manifest.files){if(item.path!=='data/results.js'||!files.has(item.path)||files.get(item.path).size!==item.size)throw Error('자료 누락 또는 크기 불일치: '+item.path);}
     $('progress').max=manifest.files.length;$('progress').value=0;
     // Preflight all hashes before any writes so a damaged package is not partially imported.
     for(let n=0;n<manifest.files.length;n++){const item=manifest.files[n];note('자료 검사 중 '+(n+1)+' / '+manifest.files.length);if(await digest(await files.get(item.path).arrayBuffer())!==item.sha256)throw Error('파일 검사 실패: '+item.path);}
     // Global index files last: first-time users cannot start before project files are registered.
-    const ordered=[...manifest.files].sort((a,b)=>(a.path==='data/catalog.js'?2:a.path==='data/ministry-index.js'?1:0)-(b.path==='data/catalog.js'?2:b.path==='data/ministry-index.js'?1:0));
+    const ordered=[...manifest.files].sort((a,b)=>(a.path==='data/results.js'?1:0)-(b.path==='data/results.js'?1:0));
     for(const item of ordered){
       note('등록 중 '+(completed+1)+' / '+ordered.length+'\n'+item.path+'\n이미 등록된 파일 '+skipped+'개');
       const ref=doc(db,'privateFiles',fileId(item.path));const old=(await getDocFromServer(ref)).data();
