@@ -157,10 +157,14 @@ export function start(data,config){
   const links=name=>'<nav class="regiontabs">'+regions.map(k=>'<a class="'+(k===r?'current':'')+'" href="#'+name+'/'+encodeURIComponent(k)+'">'+E(k)+'</a>').join('')+'</nav>';
   const reg=Object.fromEntries(regions.map(k=>[k,data[k].total]));let title,body;
   const engines=()=>box(r+' 성장엔진',config.engines[r].map(E).join(' · '));
-  if(path==='rail'){title=r+' 철도망';body=links(path)+railMap(data,r)+railSection(v)+regionalRails(data,regions);}
+  if(path==='rail'){
+   const selected=regions.find(k=>encodeURIComponent(k)===raw||k===raw);
+   const tabs='<nav class="regiontabs" aria-label="철도망 권역">'+[null,...regions].map(k=>'<a class="'+(k===(selected||null)?'current':'')+'" href="#rail'+(k?'/'+encodeURIComponent(k):'')+'">'+E(k||'전국')+'</a>').join('')+'</nav>';
+   title=(selected||'전국')+' 철도망';body=tabs+railMap(data,selected||null)+regionalRails(data,regions)+railSection(selected?data[selected]:all);
+  }
   else if(path==='regions'){title='권역별 현황';body=links(path)+engines()+status(v)+industry(v)+joint(v)+jobCross(v)+locations(v)+skills(v)+railMap(data,r)+railSection(v)+agencies(v)+deptBreakdown(v)+highlights(v);}
   else if(path==='economy'){title='분석지표 1 · 성장엔진';body=links(path)+engines()+status(v)+agencies(v)+deptBreakdown(v)+shares('경제권 지원 성격',v.economy,eco)+strategyPlot(v.ecoStrategies)+cross(v)+box('성장엔진 연결 과제',bars('실천과제',Object.entries(v.engines).map(([k,a])=>[k,a.n,a.keys]),'건')+totals(v.engines))+industry(v)+joint(v)+jobCross(v)+skills(v)+highlights(v)+box('상위 적용 산업',bars('복수 분야 중복 가능',Object.entries(v.applications).sort((a,b)=>b[1].n-a[1].n).map(([k,a])=>[k,a.n,a.keys]),'건'));}
-  else if(path==='living'){title='분석지표 2 · 정주여건';body=links(path)+shares('정주여건 유형 · 철도 제외',v.livingEx,life)+strategyPlot(v.lifeStrategies)+railMap(data,r)+railSection(v)+skills(v)+regionalRails(data,regions)+box('정주여건 분포',note('철도 제외 생활권 '+(v.categories['생활권'].n-v.railOnly.n)+'건 가운데 대중교통은 '+(v.livingEx['교통']?.n||0)+'건입니다. 과제가 없는 유형: '+(life.slice(0,6).filter(k=>!v.livingEx[k]?.n).join(' · ')||'없음')+'.')+policySource)+box('7개 권역 비교 · 철도 제외',indexedTable(['권역',...life],regions.map(k=>[E(k),...life.map(t=>pick(data[k].livingEx[t]?.n||0,k+' · '+t,data[k].livingEx[t]?.keys||[]))])));}
+  else if(path==='living'){title='분석지표 2 · 정주여건';body=links(path)+shares('정주여건 유형 · 철도 제외',v.livingEx,life)+strategyPlot(v.lifeStrategies)+railSection(v)+'<a class="tag" href="#rail/'+encodeURIComponent(r)+'">이 권역 철도망 지도 보기 →</a>'+skills(v)+box('정주여건 분포',note('철도 제외 생활권 '+(v.categories['생활권'].n-v.railOnly.n)+'건 가운데 대중교통은 '+(v.livingEx['교통']?.n||0)+'건입니다. 과제가 없는 유형: '+(life.slice(0,6).filter(k=>!v.livingEx[k]?.n).join(' · ')||'없음')+'.')+policySource)+box('7개 권역 비교 · 철도 제외',indexedTable(['권역',...life],regions.map(k=>[E(k),...life.map(t=>pick(data[k].livingEx[t]?.n||0,k+' · '+t,data[k].livingEx[t]?.keys||[]))])));}
   else if(path==='search'){title='사업 검색';body=box('사업 목록과 요약','<p>사업명·권역·부처·적용 산업으로 사업을 찾습니다.</p><label>검색어 <input id="query" placeholder="예: 중부권 교통"></label><div id="matches"></div>');}
   else if(path==='method'){title='집계 기준';body=box('단위 및 자료 범위',note('전략사업은 상위 제목 고유값, 실천과제는 과제 수입니다. 금액은 억원, 국비는 2027~2032년 요구액입니다. 0 표기·보류는 부분합에서 제외합니다.')+totals(all.budgetTypes));}
   else{
